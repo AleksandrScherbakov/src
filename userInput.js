@@ -112,7 +112,7 @@ window.onload = () => {
         formValues.append("r", r);
         formValues.append("TZ", new Date().getTimezoneOffset());
 
-        fetch("http://localhost:8000/graphChecker.php", {
+        fetch("./graphChecker.php", {
             method: "post",
             body: formValues,
         })
