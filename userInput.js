@@ -1,4 +1,5 @@
 window.onload = () => {
+
     const form = document.forms.graphForm;
     const xErrorContainer = document.getElementById("xError");
     const yErrorContainer = document.getElementById("yError");
@@ -6,35 +7,39 @@ window.onload = () => {
     const prevResultsContainer = document.getElementById("prevResults");
     const emptyPrevResults = document.getElementById("emptyPrevResults");
 
-    const pushResults = ({ x, y, r, isHit, currentTime, executionTime }) => {
+    const pushResults = (results) => {
+        if(!results?.length) return;
+        prevResultsContainer.innerHTML = "";
         emptyPrevResults.classList.add("hidden");
-        const newEntry = document.createElement("tr");
+        results.forEach(({ x, y, r, isHit, currentTime, executionTime }) => {
+            const newEntry = document.createElement("tr");
 
-        const xElem = document.createElement("td");
-        xElem.textContent = x;
-        newEntry.appendChild(xElem);
-
-        const yElem = document.createElement("td");
-        yElem.textContent = y;
-        newEntry.appendChild(yElem);
-
-        const rElem = document.createElement("td");
-        rElem.textContent = r;
-        newEntry.appendChild(rElem);
-
-        const timestampElem = document.createElement("td");
-        timestampElem.textContent = currentTime;
-        newEntry.appendChild(timestampElem);
-
-        const executionTimeElem = document.createElement("td");
-        executionTimeElem.textContent = `${executionTime} мс`;
-        newEntry.appendChild(executionTimeElem);
-
-        const isHitElem = document.createElement("td");
-        isHitElem.textContent = isHit ? "Есть" : "Нет";
-        newEntry.appendChild(isHitElem);
-
-        prevResultsContainer.prepend(newEntry);
+            const xElem = document.createElement("td");
+            xElem.textContent = x;
+            newEntry.appendChild(xElem);
+    
+            const yElem = document.createElement("td");
+            yElem.textContent = y;
+            newEntry.appendChild(yElem);
+    
+            const rElem = document.createElement("td");
+            rElem.textContent = r;
+            newEntry.appendChild(rElem);
+    
+            const timestampElem = document.createElement("td");
+            timestampElem.textContent = currentTime;
+            newEntry.appendChild(timestampElem);
+    
+            const executionTimeElem = document.createElement("td");
+            executionTimeElem.textContent = `${executionTime} мс`;
+            newEntry.appendChild(executionTimeElem);
+    
+            const isHitElem = document.createElement("td");
+            isHitElem.textContent = isHit ? "Есть" : "Нет";
+            newEntry.appendChild(isHitElem);
+    
+            prevResultsContainer.prepend(newEntry);
+        })
     };
 
     const buttonValues = {
@@ -76,6 +81,17 @@ window.onload = () => {
         }
     };
 
+    fetch(".//graphChecker.php", {
+        method: "get",
+        credentials: 'include'
+    })
+    .then(data => data.json())
+    .then(pushResults)
+    .catch((e) => {
+        alert("Возникла ошибка при получении результатов");
+        console.error(e);
+    });
+
     form.onsubmit = (event) => {
         event.preventDefault();
         const formValues = new FormData(form);
@@ -115,12 +131,13 @@ window.onload = () => {
         fetch("./graphChecker.php", {
             method: "post",
             body: formValues,
+            credentials: 'include'
         })
-            .then((data) => data.json())
-            .then(pushResults)
-            .catch((e) => {
-                alert("Возникла ошибка при обработке формы на сервере");
-                console.error(e);
-            });
+        .then((data) => data.json())
+        .then(pushResults)
+        .catch((e) => {
+            alert("Возникла ошибка при обработке формы");
+            console.error(e);
+        });
     };
 };

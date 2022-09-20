@@ -1,5 +1,10 @@
 <?php
- header("Access-Control-Allow-Origin:*");
+ header("Access-Control-Allow-Origin:same-origin");
+
+ if(!isset($_SESSION['results'])){
+  session_set_cookie_params(3600,"/", "localhost");
+  session_start();
+}
 
 function validateX($x) {
   return isset($x);
@@ -40,14 +45,17 @@ function checkCircle($x, $y, $r) {
     pow($x, 2) + pow($y, 2) <= pow($r, 2);
 }
 
-function checkHit($x, $y, $r) {
+function checkHit($x, $y, $r) { // call after form validation
+  $x = intval($x);
+  $y = floatval($y);
+  $r = intval($r);
   return checkTriangle($x, $y, $r) || checkSquare($x, $y, $r) ||
     checkCircle($x, $y, $r);
 }
 
-$x = intval($_POST['x']);
-$y = floatval($_POST['y']);
-$r = intval($_POST['r']);
+$x = $_POST['x'];
+$y = $_POST['y'];
+$r = $_POST['r'];
 $timezoneOffset = $_POST['TZ'];
 
 $isValid = validateForm($x, $y, $r);
@@ -55,10 +63,19 @@ $isValid = validateForm($x, $y, $r);
 $isHit = $isValid ? checkHit($x, $y, $r) : false;
 
 $currentTime = date('H:i:s', time()- $timezoneOffset * 60);
-$executionTime = round(microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'], 7);
-echo json_encode(
-    array(
+$executionTime = round(microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT'], 7);
+
+$tmp = json_decode($_SESSION['results']);
+if($isValid) {
+  $tmp[] = array(
     "x" => $x, "y" => $y, "r" => $r, "isHit" => $isHit, "currentTime" => $currentTime, "executionTime" => $executionTime
-    )
-);
+  );
+}
+// $tmp =  array(
+  // "x" => $x, "y" => $y, "r" => $r, "isHit" => $isHit, "currentTime" => $currentTime, "executionTime" => $executionTime
+// );
+$tmp = json_encode($tmp);
+$_SESSION['results'] = $tmp;
+echo $_SESSION['results'];
+
 ?>
