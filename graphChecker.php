@@ -2,7 +2,7 @@
  header("Access-Control-Allow-Origin:same-origin");
 
  if(!isset($_SESSION['results'])){
-  session_set_cookie_params(3600,"/", "localhost");
+  session_set_cookie_params(3600,"/");
   session_start();
 }
 
